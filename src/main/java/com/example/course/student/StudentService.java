@@ -26,7 +26,7 @@ public class StudentService {
 		boolean exist = studentRepository.checkStudentByEmail(student.getEmail());
 
 		if (exist) {
-			throw new IllegalStateException("email take");
+			throw new IllegalStateException("email: " + student.getEmail() + " is taken");
 		}
 		return studentRepository.save(student);
 	}

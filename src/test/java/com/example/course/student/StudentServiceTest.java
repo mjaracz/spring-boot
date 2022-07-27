@@ -11,6 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.Month;
 
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,14 +33,12 @@ class StudentServiceTest {
 
 	@Test
 	void canGetStudents() {
-		// when
 		underTest.getStudents();
-		// then
 		verify(studentRepository).findAll();
 	}
 
 	@Test
-	void addNewStudent() {
+	void canAddNewStudent() {
 		Student student = new Student(
 			"Username",
 			"exmaple@gmail.com",
@@ -44,6 +47,21 @@ class StudentServiceTest {
 		underTest.addNewStudent(student);
 		ArgumentCaptor<Student> studentArgumentCaptor = ArgumentCaptor.forClass(Student.class);
 		verify(studentRepository).save(studentArgumentCaptor.capture());
+	}
+
+	@Test
+	void whenAddNewStudentAndEmailIsTakenThrowException() {
+		Student student = new Student(
+			"Username",
+			"noCorrectEmail@example.com",
+			LocalDate.of(2000, Month.JANUARY, 4)
+		);
+		given(studentRepository.checkStudentByEmail(student.getEmail()))
+			.willReturn(true);
+		assertThatThrownBy(() -> underTest.addNewStudent(student))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("email: " + student.getEmail() + " is taken");
+		verify(studentRepository, never()).save(any());
 	}
 
 	@Test

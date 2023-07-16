@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Optional;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -65,12 +66,23 @@ class StudentServiceTest {
 	}
 
 	@Test
-	@Disabled
-	void deleteStudent() {
+	void whenDeleteStudentAndIdNotExistThrowException() {
+		Long deletedStudentId = 2L;
+		given(studentRepository.existsById(deletedStudentId))
+				.willReturn(false);
+		assertThatThrownBy(() -> underTest.deleteStudent(deletedStudentId))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("student with id " + deletedStudentId + " dose not exist");
+		verify(studentRepository, never()).deleteById(any());
 	}
 
 	@Test
 	@Disabled
-	void updateStudent() {
+	void shouldUpdateStudent() {
+		Optional<Student> student = studentRepository.findById(2L);
+
+		underTest.updateStudent(2L, "updated name", "update-me@java-advantger.pl");
+		ArgumentCaptor<Student> studentArgumentCaptor = ArgumentCaptor.forClass(Student.class);
+
 	}
 }
